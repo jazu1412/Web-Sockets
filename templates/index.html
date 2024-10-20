@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f7f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .chat-container {
+            width: 400px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: #0078d4;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.25em;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f4f7f9;
+        }
+
+        .message {
+            margin: 10px 0;
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .sent {
+            background-color: #0078d4;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+
+        .received {
+            background-color: #e5e5ea;
+            color: black;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ccc;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .chat-input button {
+            background-color: #0078d4;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background-color: #005a9e;
+        }
+
+        /* Scroll styling */
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background-color: #0078d4;
+            border-radius: 3px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">WebSocket Chat</div>
+        <div class="chat-box" id="chat-box">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="message" placeholder="Type a message..." onkeydown="if(event.key === 'Enter'){ sendMessage(); }">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (message.trim() === "") return;
+
+            // Display the sent message in the chat box
+            const chatBox = document.getElementById('chat-box');
+            const sentMessage = document.createElement('div');
+            sentMessage.className = 'message sent';
+            sentMessage.innerText = message;
+            chatBox.appendChild(sentMessage);
+
+            // Clear the input field
+            document.getElementById('message').value = "";
+
+            // Scroll to the bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Send the message to the server
+            fetch(`/send_message/${message}`)
+                .then(response => response.text())
+                .then(data => {
+                    // Display the received message in the chat box
+                    const receivedMessage = document.createElement('div');
+                    receivedMessage.className = 'message received';
+                    receivedMessage.innerText = data;
+                    chatBox.appendChild(receivedMessage);
+
+                    // Scroll to the bottom
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+        }
+    </script>
+</body>
+</html>
